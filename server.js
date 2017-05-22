@@ -37,8 +37,8 @@ var svr = net.createServer(function(sock) {
 			sock.write("FAIL");
 		else{
 			var init_mem = [];
-			init_mem.push(usrName)
-			chatrooms.push({name:operands[1], member:init_mem});
+			init_mem.push(usrName);
+			chatrooms.push({name:operands[1], member:init_mem, active:[]});
 			sock.write("SUCCESS")
 		}
 	}
@@ -54,8 +54,71 @@ var svr = net.createServer(function(sock) {
 		sock.write(q);
 	}
 
+	else if(operands[0] == 'IN'){
+		var roomN = operands[1];
+		for(i = 0;i<chatrooms.length;i++){
+			if(chatrooms[i].name == roomN){
+				chatrooms[i].active.push(usrName);
+			}
+		}	
+	}
+
+	else if(operands[0] == 'OUT'){
+		var roomN = operands[1];
+		for(i = 0;i<chatrooms.length;i++){
+			if(chatrooms[i].name == roomN){
+				var q = chatrooms[i].member.indexOf(usrName);
+				chatrooms[i].active.splice(q, 1);
+			}
+		}	
+	}
+
+	else if(operands[0] == 'ADD_USER'){
+		var usrN = operands[2];
+		var roomN = operands[1];
+		for(i = 0;i<chatrooms.length;i++){
+			if(chatrooms[i].name == roomN){
+				if(chatrooms[i].member.indexOf(usrN) == -1){
+					chatrooms[i].member.push(usrN);
+					sock.write('SUCCESS');
+				}
+				else
+					sock.write('FAIL');
+			}
+		}	
+	}
+
+	else if(operands[0] == 'GET_USER'){
+		var usrs = '';
+		for(i = 0;i<users.length;i++){
+			usrs += users[i].name + ' ';
+		}	
+		sock.write(usrs);
+	}
+
 	else if(operands[0] == 'SEND_ME_EXIT_CODE'){
 		sock.write('exit()');
+	}
+
+	else if(operands[0] == 'CHAT'){
+		var roomN = operands[1];
+		var msg = ''
+		for(i = 2;i<operands.length;i++){
+			msg += operands[i] + ' ';
+		}
+		for(i = 0;i<chatrooms.length;i++){
+			if(chatrooms[i].name == roomN){
+				for(j = 0;j<chatrooms[i].active.length;j++){
+					if(chatrooms[i].active[j] != usrName){
+						var na = chatrooms[i].active[j];
+						for(k = 0;k<users.length;k++){
+							if(users[k].name == na)
+								users[k].socket.write(msg);
+						}
+					}
+				}
+			}
+		}			
 	}
     });
 

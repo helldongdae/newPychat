@@ -1,4 +1,6 @@
+from Tkinter import *
 import threading
+import socket
 
 class thread(threading.Thread):
  	def __init__(self, sock, e):
@@ -11,8 +13,8 @@ class thread(threading.Thread):
 		data = self.s.recv(1024)
 		if data == 'exit()':
 			return
-		e.insert(data+'\n')
-		return thread(self.s).start()
+		self.e.insert(END, data+'\n')
+		return thread(self.s, self.e).start()
 
     	def stop(self):
 		self._stop.set()

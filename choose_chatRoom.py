@@ -1,6 +1,7 @@
 from Tkinter import *
 import tkMessageBox
 import chatRoom
+import propagate
 class show:
 	def __init__(self, s):
 		self.s = s
@@ -40,10 +41,10 @@ class show:
 			e.bind('<Return>', func)
 
 		def doubleclickCallback(event):
-			chatRoom.show(self.s)
+			chatRoom.show(self.s, listbox.get(ACTIVE))
 
-		def propCallback(event):
-			print listbox.get(ACTIVE)
+		def propCallback():
+			propagate.show(self.s)
 
 		b = Button(root, text="refresh", command=refreshCallback)
 		b.pack()
