@@ -3,6 +3,7 @@
 var net = require('net');
 var users = [];
 var chatrooms = [];
+var propmes = [];
 var connected = 0;
 
 var svr = net.createServer(function(sock) {
@@ -60,6 +61,12 @@ var svr = net.createServer(function(sock) {
 			if(chatrooms[i].name == roomN){
 				chatrooms[i].active.push(usrName);
 			}
+		}
+		for(i = 0;i<propmes.length;i++){
+			if(propmes[i].rooms.indexOf(roomN) != -1){
+				propmes[i].readUser.add(usrName);
+				console.log(propmes[i].totalUser.size - propmes[i].readUser.size+' Users have not read')
+			}
 		}	
 	}
 
@@ -98,6 +105,32 @@ var svr = net.createServer(function(sock) {
 
 	else if(operands[0] == 'SEND_ME_EXIT_CODE'){
 		sock.write('exit()');
+	}
+
+	else if(operands[0] == 'PROP'){
+		var N = parseInt(operands[1]);
+		var readed = 0;
+		var readUser = new Set();
+		var totalUser = new Set();
+		var proped = {rooms:[], start:usrName, left:0, readUser:new Set(), totalUser:new Set()};	
+		for(i = 2;i<N+2;i++){
+			proped.rooms.push(operands[i])
+			for(j = 0;j<chatrooms.length;j++){
+				if(chatrooms[j].name == operands[i]){
+					for(k = 0;k<chatrooms[j].member.length;k++){
+						totalUser.add(chatrooms[j].member[k]);
+					}
+					for(k = 0;k<chatrooms[j].active.length;k++){
+						readUser.add(chatrooms[j].active[k]);
+					}
+				}
+			}
+		}
+		proped.left = totalUser.size - readUser.size;
+		proped.readUser = readUser;
+		proped.totalUser = totalUser;
+		console.log(proped.left+' People have not read this')
+		propmes.push(proped);
 	}
 
 	else if(operands[0] == 'CHAT'){
