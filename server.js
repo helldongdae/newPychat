@@ -57,17 +57,29 @@ var svr = net.createServer(function(sock) {
 
 	else if(operands[0] == 'IN'){
 		var roomN = operands[1];
-		for(i = 0;i<chatrooms.length;i++){
-			if(chatrooms[i].name == roomN){
-				chatrooms[i].active.push(usrName);
-			}
-		}
+
+		var n_read = 0;
 		for(i = 0;i<propmes.length;i++){
 			if(propmes[i].rooms.indexOf(roomN) != -1){
 				propmes[i].readUser.add(usrName);
-				console.log(propmes[i].totalUser.size - propmes[i].readUser.size+' Users have not read')
+				n_read = propmes[i].totalUser.size - propmes[i].readUser.size;
+				console.log(n_read+' Users have not read')
+				
 			}
 		}	
+
+		for(i = 0;i<chatrooms.length;i++){
+			if(chatrooms[i].name == roomN){
+				chatrooms[i].active.push(usrName);
+				for(j = 0;j<chatrooms[i].active.length;j++){
+					var uname = chatrooms[i].active[j];					
+					for(k = 0;k<users.length;k++){
+						if(uname == users[k].name)
+							users[k].socket.write("PROP "+n_read+"   ");
+					}
+				}
+			}
+		}
 	}
 
 	else if(operands[0] == 'OUT'){
@@ -126,10 +138,23 @@ var svr = net.createServer(function(sock) {
 				}
 			}
 		}
+		var msg = ''
+		for(i = N+2;i<operands.length;i++){
+			msg += operands[i]+ ' ';
+		}
 		proped.left = totalUser.size - readUser.size;
 		proped.readUser = readUser;
 		proped.totalUser = totalUser;
+		var d = new Date();
+		for(let q of totalUser){
+			for(j = 0;j<users.length;j++){
+				if(users[j].name == q) 
+					users[j].socket.write("PROP "+proped.left+msg+" "+d);
+			}
+		}
+		console.log(d);
 		console.log(proped.left+' People have not read this')
+		console.log(msg);
 		propmes.push(proped);
 	}
 

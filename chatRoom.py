@@ -9,10 +9,12 @@ class show:
 		self.s.sendall('IN '+self.name)
 		root = Tk()
 		text = Text(root)
+		proped = Text(root, width = 10, height = 10)
+		proped.pack(side = RIGHT)
 		listbox = Listbox(root)
 		self.e = Entry(root, width = 70)
 		self.e.pack(side = BOTTOM)
-		self.t = networkThread.thread(self.s, text)
+		self.t = networkThread.thread(self.s, text, proped)
 		self.t.start()
 		def func(event):
 			text.insert(END, self.e.get()+'\n')
@@ -32,7 +34,7 @@ class show:
 				text.insert(END, 'He/ She is already in this chatroom'+'\n')
 			else:
 				text.insert(END, listbox.get(ACTIVE)+' joined'+'\n')
-			self.t = networkThread.thread(self.s, text)
+			self.t = networkThread.thread(self.s, text, proped)
 			self.t.start()
 		listbox.bind('<Double-Button-1>', doubleclickCallback)
 		listbox.pack(side = RIGHT)
@@ -46,7 +48,7 @@ class show:
 			listbox.delete(0, END)
 			for i in usr:
 				listbox.insert(END, i)
-			self.t = networkThread.thread(self.s, text)
+			self.t = networkThread.thread(self.s, text, proped)
 			self.t.start()
 				
 		b = Button(root, text="refresh", command=refreshCallback)
